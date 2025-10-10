@@ -4,8 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formulare</title>
+
 </head>
 <body>
-    
+    model Fahrrad {
+  modellnummer Int           @id @default(autoincrement())
+  preis       Float
+  farbe      String
+  groesse    String
+  typ       String
+}
 </body>
 </html>
