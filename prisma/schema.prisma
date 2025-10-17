@@ -1,5 +1,5 @@
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -34,7 +34,7 @@ model Abteilung {
 model Pendelverhalten {
   id              Int            @id @default(autoincrement())
   mitarbeiterId   Int            @map("mitarbeiter_id")
-  berichtsmonat   DateTime       @db.Date
+  berichtsmonat   DateTime
   pendelstreckeKm Float          @map("pendelstrecke_km")
   anzahlTage      Int            @map("anzahl_tage")
   verkehrsmittel  String
@@ -65,7 +65,7 @@ model Emissionsfaktor {
   id              Int      @id @default(autoincrement())
   kategorie       String
   unterkategorie  String
-  emissionsfaktor Float    @db.Decimal(10, 8)
+  emissionsfaktor Float
   einheit         String
   quelle          String
   gueltigAb       DateTime @map("gueltig_ab")
@@ -78,7 +78,7 @@ model Emissionsfaktor {
 model CO2Emissionen {
   id               Int              @id @default(autoincrement())
   mitarbeiterId    Int              @map("mitarbeiter_id")
-  berichtszeitraum DateTime         @db.Date
+  berichtszeitraum DateTime
   co2eKg           Float            @map("co2e_kg")
   berechnungsdatum DateTime         @default(now())
   scope            Int
