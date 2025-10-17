@@ -1,23 +1,133 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
-generator client {
-  provider = "prisma-client-js"
-  output   = "../generated/prisma"
-}
-
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-model Fahrrad {
-  modellnummer Int           @id @default(autoincrement())
-  preis       Float
-  farbe      String
-  groesse    String
-  typ       String
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Mitarbeiter {
+  id             Int      @id @default(autoincrement())
+  personalnummer String   @unique
+  anlagedatum    DateTime @default(now())
+  klasse         String?
+
+  abteilungId  Int               @map("abteilung_id")
+  abteilung    Abteilung         @relation(fields: [abteilungId], references: [id])
+  benutzer     Benutzer?
+  pendeldaten  Pendelverhalten[]
+  dienstreisen Dienstreise[]
+  emissionen   CO2Emissionen[]
+
+  @@map("mitarbeiter")
+}
+
+model Abteilung {
+  id          Int           @id @default(autoincrement())
+  name        String        @unique
+  mitarbeiter Mitarbeiter[]
+
+  @@map("abteilungen")
+}
+
+model Pendelverhalten {
+  id              Int            @id @default(autoincrement())
+  mitarbeiterId   Int            @map("mitarbeiter_id")
+  berichtsmonat   DateTime       @db.Date
+  pendelstreckeKm Float          @map("pendelstrecke_km")
+  anzahlTage      Int            @map("anzahl_tage")
+  verkehrsmittel  String
+  kraftstoffart   String?
+  eingabedatum    DateTime       @default(now())
+  mitarbeiter     Mitarbeiter    @relation(fields: [mitarbeiterId], references: [id])
+  emission        CO2Emissionen?
+
+  @@map("pendelverhalten")
+}
+
+model Dienstreise {
+  id             Int      @id @default(autoincrement())
+  mitarbeiterId  Int      @map("mitarbeiter_id")
+  startDatum     DateTime @map("start_datum")
+  endDatum       DateTime @map("end_datum")
+  verkehrsmittel String
+  streckeKm      Float    @map("strecke_km")
+  klasse         String?
+
+  mitarbeiter Mitarbeiter    @relation(fields: [mitarbeiterId], references: [id])
+  emission    CO2Emissionen?
+
+  @@map("dienstreisen")
+}
+
+model Emissionsfaktor {
+  id              Int      @id @default(autoincrement())
+  kategorie       String
+  unterkategorie  String
+  emissionsfaktor Float    @db.Decimal(10, 8)
+  einheit         String
+  quelle          String
+  gueltigAb       DateTime @map("gueltig_ab")
+
+  emissionen CO2Emissionen[]
+
+  @@map("emissionsfaktoren")
+}
+
+model CO2Emissionen {
+  id               Int              @id @default(autoincrement())
+  mitarbeiterId    Int              @map("mitarbeiter_id")
+  berichtszeitraum DateTime         @db.Date
+  co2eKg           Float            @map("co2e_kg")
+  berechnungsdatum DateTime         @default(now())
+  scope            Int
+  pendelId         Int?             @unique @map("pendel_id")
+  pendelverhalten  Pendelverhalten? @relation(fields: [pendelId], references: [id])
+  reiseId          Int?             @unique @map("reise_id")
+  dienstreise      Dienstreise?     @relation(fields: [reiseId], references: [id])
+
+  mitarbeiter Mitarbeiter @relation(fields: [mitarbeiterId], references: [id])
+
+  faktorId        Int?             @map("faktor_id")
+  emissionsfaktor Emissionsfaktor? @relation(fields: [faktorId], references: [id])
+
+  @@index([mitarbeiterId, berichtszeitraum])
+  @@map("co2_emissionen")
+}
+
+model Benutzer {
+  id           Int     @id @default(autoincrement())
+  loginEmail   String  @unique @map("login_email")
+  passwortHash String  @map("passwort_hash")
+  aktiv        Boolean @default(true)
+
+  mitarbeiterId Int?         @unique @map("mitarbeiter_id")
+  mitarbeiter   Mitarbeiter? @relation(fields: [mitarbeiterId], references: [id])
+  rolleId       Int          @map("rolle_id")
+  rolle         Rolle        @relation(fields: [rolleId], references: [id])
+
+  @@map("benutzer")
+}
+
+model Rolle {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  benutzer       Benutzer[]
+  berechtigungen Berechtigung[]
+
+  @@map("rollen")
+}
+
+model Berechtigung {
+  id        Int    @id @default(autoincrement())
+  rolleId   Int    @map("rolle_id")
+  ressource String
+  aktion    String
+
+  rolle Rolle @relation(fields: [rolleId], references: [id])
+
+  @@unique([rolleId, ressource, aktion])
+  @@map("berechtigungen")
 }
