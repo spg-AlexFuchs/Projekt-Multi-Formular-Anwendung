@@ -1,0 +1,20 @@
+body {
+    margin: 0;
+    padding-top: 80px;
+    /* Höhe der fixen Navbar */
+}
+
+.fullscreen-header {
+    height: calc(100vh - 80px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background-color: #f8f9fa;
+}
+
+#headerLogoText {
+    font-family: 'Pacifico', cursive;
+    font-size: 5rem;
+    color: #333;
+}
