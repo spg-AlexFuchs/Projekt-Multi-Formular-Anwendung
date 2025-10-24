@@ -3,6 +3,7 @@
     "prisma": "^6.17.0"
   },
   "dependencies": {
+    "@faker-js/faker": "^10.1.0",
     "@prisma/client": "^6.17.0"
   },
   "name": "projekt-multi-formular-anwendung",
@@ -10,7 +11,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "seed": "node seed.js"
   },
   "repository": {
     "type": "git",
@@ -23,5 +25,8 @@
   "bugs": {
     "url": "https://github.com/spg-AlexFuchs/Projekt-Multi-Formular-Anwendung/issues"
   },
-  "homepage": "https://github.com/spg-AlexFuchs/Projekt-Multi-Formular-Anwendung#readme"
+  "homepage": "https://github.com/spg-AlexFuchs/Projekt-Multi-Formular-Anwendung#readme",
+  "prisma": {
+  "seed": "node seed.js"
+}
 }
