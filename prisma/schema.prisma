@@ -8,8 +8,8 @@ generator client {
 }
 
 model Fahrrad {
-  id String @id @default(cuid())
-  name String
+  id    String @id @default(cuid())
+  name  String
   preis Float
   zoll  Float
   farbe String
