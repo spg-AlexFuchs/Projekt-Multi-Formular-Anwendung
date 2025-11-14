@@ -93,6 +93,30 @@ app.delete("/fahrrad", async (req, res) => {
     }
 });
 
+// -------------------- ROUTE: ALLE VERFÜGBAREN ZOLLGRÖSSEN --------------------
+// Wenn da Browser /fahrrad/zoll aufruft, liefert der Server olle verschiedenen Zollgrößen zurück.
+app.get("/fahrrad/zoll", async (req, res) => {
+    try {
+        // Prisma-Befehl: findMany holt alle Einträge aus der Tabelle "Fahrrad"
+        // select: { zoll: true } → wir wollen nur das Feld "zoll"
+        // distinct: ["zoll"] → gleiche Werte werden zusammengefasst (doppelte raus)
+        const zoll = await prisma.Fahrrad.findMany({
+            select: { zoll: true },  
+            distinct: ["zoll"]        
+        });
+
+        // Ergebnis als JSON an den Client schicken
+        res.json(zoll);
+
+    } catch (error) {
+        // Fehler im Serverlog anzeigen
+        console.error("Fehler beim Laden der Zollgrößen:", error);
+
+        // Dem Browser a nette Fehlermeldung senden
+        res.status(500).json({ error: "Heast, beim Laden der Zollgrößen is wos schiefganga" });
+    }
+});
+
 
 // -------------------- 4) EINZELNES FAHRRAD LADEN --------------------
 // Des is die Route, mit der ma a einzigs Radl über seine ID abfragt.
@@ -134,29 +158,7 @@ app.get("/fahrrad/:id", async (req, res) => {
     }
 });
 
-// -------------------- ROUTE: ALLE VERFÜGBAREN ZOLLGRÖSSEN --------------------
-// Wenn da Browser /fahrrad/zoll aufruft, liefert der Server olle verschiedenen Zollgrößen zurück.
-app.get("/fahrrad/zoll", async (req, res) => {
-    try {
-        // Prisma-Befehl: findMany holt alle Einträge aus der Tabelle "Fahrrad"
-        // select: { zoll: true } → wir wollen nur das Feld "zoll"
-        // distinct: ["zoll"] → gleiche Werte werden zusammengefasst (doppelte raus)
-        const zoll = await prisma.Fahrrad.findMany({
-            select: { zoll: true },  
-            distinct: ["zoll"]        
-        });
 
-        // Ergebnis als JSON an den Client schicken
-        res.json(zoll);
-
-    } catch (error) {
-        // Fehler im Serverlog anzeigen
-        console.error("Fehler beim Laden der Zollgrößen:", error);
-
-        // Dem Browser a nette Fehlermeldung senden
-        res.status(500).json({ error: "Heast, beim Laden der Zollgrößen is wos schiefganga" });
-    }
-});
 
 
 
