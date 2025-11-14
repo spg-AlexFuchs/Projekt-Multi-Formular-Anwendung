@@ -1,3 +1,4 @@
+// --- Fahrrad speichern ---
 async function fahrradspeichern() {
     const rad = {
         name: document.getElementById("bikename").value,
@@ -16,6 +17,7 @@ async function fahrradspeichern() {
 }
 
 
+// --- Manuelle Dateneingabe ---
 async function dateneingabe(name, preis, zoll, farbe) {
     const rad = { name, preis, zoll, farbe };
 
@@ -29,12 +31,15 @@ async function dateneingabe(name, preis, zoll, farbe) {
 }
 
 
+// --- Liste der Fahrräder laden ---
 async function ladeFahrradListe() {
     const response = await fetch("http://localhost:3000/fahrrad");
     const bikes = await response.json();
 
     const select = document.getElementById("fahrradSelect");
-    select.innerHTML = ""; // alte Einträge entfernen
+    if (!select) return;
+
+    select.innerHTML = "";
 
     bikes.forEach(bike => {
         const option = document.createElement("option");
@@ -43,8 +48,9 @@ async function ladeFahrradListe() {
         select.appendChild(option);
     });
 }
-document.addEventListener("DOMContentLoaded", ladeFahrradListe);
 
+
+// --- Details eines Fahrrads anzeigen ---
 async function zeigeFahrradDetails(id) {
     const response = await fetch(`http://localhost:3000/fahrrad/${id}`);
     const bike = await response.json();
@@ -59,45 +65,46 @@ async function zeigeFahrradDetails(id) {
             <p><strong>Preis:</strong> ${bike.preis} €</p>
         </div>
     `;
-    
 }
 
-async function Charthinzufuegen(){
-        document.addEventListener("DOMContentLoaded", () => {
-    fetch("http://localhost:3000/statistik/fahrrad-groessen")
-        .then(res => res.json())
-        .then(data => {
-            console.log("Statistik geladen:", data);
 
-            const labels = data.map(e => e.size + " Zoll");
-            const counts = data.map(e => e.count);
+// --- Chart hinzufügen ---
+async function Charthinzufuegen() {
+    try {
+        const res = await fetch("http://localhost:3000/fahrrad/zoll");
+        const data = await res.json();
 
-            const ctx = document.getElementById("bikeChart").getContext("2d");
+        console.log("Statistik geladen:", data);
 
-            new Chart(ctx, {
-                type: "bar",
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: "Anzahl Fahrräder nach Größe",
-                        data: counts,
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
+        const labels = data.map(e => e.size + " Zoll");
+        const counts = data.map(e => e.count);
+
+        const ctx = document.getElementById("bikeChart").getContext("2d");
+
+        new Chart(ctx, {
+            type: "bar",
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: "Anzahl Fahrräder nach Größe",
+                    data: counts,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: { beginAtZero: true }
                 }
-            });
-        })
-        .catch(err => console.error("Fehler beim Laden der Statistik:", err));
-});
+            }
+        });
 
+    } catch (err) {
+        console.error("Fehler beim Laden der Statistik:", err);
+    }
 }
 
+
+// --- Daten löschen ---
 async function Datenloschen() {
     await fetch("http://localhost:3000/fahrrad", {
         method: "DELETE"
@@ -107,6 +114,7 @@ async function Datenloschen() {
 }
 
 
+// --- Daten anzeigen ---
 async function Datenanzeige() {
     const response = await fetch("http://localhost:3000/fahrrad");
     const raeder = await response.json();
@@ -115,15 +123,17 @@ async function Datenanzeige() {
     return raeder;
 }
 
+
+// --- Seite initialisieren ---
 document.addEventListener("DOMContentLoaded", () => {
     ladeFahrradListe();
+    Charthinzufuegen();
 
     const select = document.getElementById("fahrradSelect");
-    select.addEventListener("change", (event) => {
-        const id = event.target.value;
-
-        if (id) {
-            zeigeFahrradDetails(id);
-        }
-    });
+    if (select) {
+        select.addEventListener("change", () => {
+            const id = select.value;
+            if (id) zeigeFahrradDetails(id);
+        });
+    }
 });
