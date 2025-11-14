@@ -3,7 +3,8 @@ const prisma = new PrismaClient();
 const { fakerDE } = require('@faker-js/faker');
 
 
-function fahrradspeichern(){
+
+async function fahrradspeichern(){
     const name = document.getElementById("bikename").value;
     const farbe = document.getElementById("bikecolor").value;
     const zoll = document.getElementById("bikesize").value;
@@ -22,7 +23,7 @@ function fahrradspeichern(){
 
 
 
-async function dateneingabe(string name, float preis, float zoll, string farbe){
+async function dateneingabe(name, preis, zoll, farbe){
     const prisma = new PrismaClient()
     
     const rad ={
