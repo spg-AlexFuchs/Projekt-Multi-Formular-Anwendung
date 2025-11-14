@@ -62,7 +62,41 @@ async function zeigeFahrradDetails(id) {
     
 }
 
+async function Charthinzufuegen(){
+        document.addEventListener("DOMContentLoaded", () => {
+    fetch("http://localhost:3000/statistik/fahrrad-groessen")
+        .then(res => res.json())
+        .then(data => {
+            console.log("Statistik geladen:", data);
 
+            const labels = data.map(e => e.size + " Zoll");
+            const counts = data.map(e => e.count);
+
+            const ctx = document.getElementById("bikeChart").getContext("2d");
+
+            new Chart(ctx, {
+                type: "bar",
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: "Anzahl Fahrräder nach Größe",
+                        data: counts,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        })
+        .catch(err => console.error("Fehler beim Laden der Statistik:", err));
+});
+
+}
 
 async function Datenloschen() {
     await fetch("http://localhost:3000/fahrrad", {
