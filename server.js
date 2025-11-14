@@ -93,29 +93,35 @@ app.delete("/fahrrad", async (req, res) => {
     }
 });
 
-// -------------------- ROUTE: ALLE VERFÜGBAREN ZOLLGRÖSSEN --------------------
-// Wenn da Browser /fahrrad/zoll aufruft, liefert der Server olle verschiedenen Zollgrößen zurück.
-app.get("/fahrrad/zoll", async (req, res) => {
+// -------------------- ROUTE: ZOLLGRÖSSEN + HÄUFIGKEIT (flaches Format) --------------------
+// Do kriagst olle vorhandenen Zollgrößen und wia oft's jede gibt.
+// Aber ned verschachtelt – jedes Objekt hod nur "size" und "count".
+app.get("/fahrrad/zoll/statistik", async (req, res) => {
     try {
-        // Prisma-Befehl: findMany holt alle Einträge aus der Tabelle "Fahrrad"
-        // select: { zoll: true } → wir wollen nur das Feld "zoll"
-        // distinct: ["zoll"] → gleiche Werte werden zusammengefasst (doppelte raus)
-        const zoll = await prisma.Fahrrad.findMany({
-            select: { zoll: true },  
-            distinct: ["zoll"]        
+        // Prisma: Gruppiert uns olle Fahrräder nach "zoll" und zählt, wia oft jede Größe vorkommt
+        const stats = await prisma.Fahrrad.groupBy({
+            by: ['zoll'],           // Gruppieren nach Zoll
+            _count: { zoll: true }  // Zählen wia oft jede Größe da is
         });
 
-        // Ergebnis als JSON an den Client schicken
-        res.json(zoll);
+        // Jetzt machen ma a flaches Array draus, dass ma ned verschachtelte Objekte hat
+        const result = stats.map(s => ({
+            size: s.zoll,           // Größe reinschreiben
+            count: s._count.zoll    // Wia oft die Größe vorkommt
+        }));
+
+        // JSON zruckschicken an Browser / Client
+        res.json(result);
 
     } catch (error) {
-        // Fehler im Serverlog anzeigen
-        console.error("Fehler beim Laden der Zollgrößen:", error);
+        // Wenn wos schiefgeht, schreiben ma’s ins Serverlog
+        console.error("Fehler beim Laden der Zoll-Statistik:", error);
 
-        // Dem Browser a nette Fehlermeldung senden
-        res.status(500).json({ error: "Heast, beim Laden der Zollgrößen is wos schiefganga" });
+        // Und a nette Fehlermeldung an Client schicken
+        res.status(500).json({ error: "Heast, bei der Zoll-Statistik is wos schiefganga" });
     }
 });
+
 
 
 // -------------------- 4) EINZELNES FAHRRAD LADEN --------------------
