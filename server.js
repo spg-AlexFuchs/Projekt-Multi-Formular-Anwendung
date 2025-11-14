@@ -96,7 +96,7 @@ app.delete("/fahrrad", async (req, res) => {
 // -------------------- ROUTE: ZOLLGRÖSSEN + HÄUFIGKEIT (flaches Format) --------------------
 // Do kriagst olle vorhandenen Zollgrößen und wia oft's jede gibt.
 // Aber ned verschachtelt – jedes Objekt hod nur "size" und "count".
-app.get("/fahrrad/zoll/statistik", async (req, res) => {
+app.get("/fahrrad/zoll", async (req, res) => {
     try {
         // Prisma: Gruppiert uns olle Fahrräder nach "zoll" und zählt, wia oft jede Größe vorkommt
         const stats = await prisma.Fahrrad.groupBy({
