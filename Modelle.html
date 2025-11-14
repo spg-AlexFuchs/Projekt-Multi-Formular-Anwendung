@@ -57,5 +57,38 @@
         <!-- Hier kommen später die Daten rein -->
          
     </div>
-    </div>
+</div>
+<div class="container mt-5">
+    <h2>Fahrräder verwalten</h2>
+
+    <!-- Dropdown zum Auswählen eines Fahrrads -->
+    <label for="fahrradSelect" class="form-label">Fahrrad auswählen:</label>
+        <select id="fahrradSelect" class="form-select">
+            <option>– Fahrrad wählen –</option>
+        </select>
+
+    <!-- Formular zum Bearbeiten -->
+    <form id="bikeForm">
+        <input type="hidden" id="bikeId">
+        <div class="mb-3">
+            <label for="bikename" class="form-label">Name</label>
+            <input type="text" id="bikename" class="form-control">
+        </div>
+        <div class="mb-3">
+            <label for="bikeprice" class="form-label">Preis</label>
+            <input type="number" step="0.01" id="bikeprice" class="form-control">
+        </div>
+        <div class="mb-3">
+            <label for="bikesize" class="form-label">Zoll</label>
+            <input type="number" step="0.1" id="bikesize" class="form-control">
+        </div>
+        <div class="mb-3">
+            <label for="bikecolor" class="form-label">Farbe</label>
+            <input type="text" id="bikecolor" class="form-control">
+        </div>
+        <button type="submit" class="btn btn-primary">Speichern</button>
+        <button type="button" id="deleteBike" class="btn btn-danger ms-2">Löschen</button>
+    </form>
+</div>
+    
 </html>
