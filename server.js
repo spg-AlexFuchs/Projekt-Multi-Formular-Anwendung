@@ -1,46 +1,58 @@
-// server.js
-const express = require('express');
-const bodyParser = require('body-parser');
-const path = require('path');
-// Importieren der Datenbankfunktion aus script.js
-const { dateneingabe } = require('./script');
+const express = require("express");
+const cors = require("cors");
+const { PrismaClient } = require("@prisma/client");
 
 const app = express();
-const port = 3000;
+const prisma = new PrismaClient();
 
-// Middleware, um Formulardaten zu verarbeiten
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cors({
+    origin: "*",
+    methods: ["GET", "POST", "DELETE"],
+    allowedHeaders: ["Content-Type"]
+}));
 
-// **Wichtig:** Statische Dateien (CSS) im Ordner html_files bedienen
-app.use(express.static(path.join(__dirname, 'html_files')));
-// Das bedeutet, dass z.B. die Datei style.css über /style.css erreichbar ist.
+app.use(express.json());
 
-// Route für die Startseite (home.html)
-app.get('/', (req, res) => {
-    // Senden von home.html aus dem Unterordner
-    res.sendFile(path.join(__dirname, 'html_files', 'home.html'));
-});
-
-// Route für das Formular (Fahrrad hinzufügen)
-app.get('/fahrrad-hinzufuegen', (req, res) => {
-    // Senden von Fahrrad_Hinzufuegen.html
-    res.sendFile(path.join(__dirname, 'html_files', 'Fahrrad_Hinzufuegen.html'));
-});
-
-// **Die POST-Route für das Formular**
-app.post('/fahrrad-hinzufuegen', async (req, res) => {
-    const { name, preis, zoll, farbe } = req.body;
-
+// ----------------------------
+// Fahrrad speichern
+// ----------------------------
+app.post("/fahrrad", async (req, res) => {
     try {
-        await dateneingabe(name, preis, zoll, farbe);
-        // Nach erfolgreicher Eingabe auf die Startseite umleiten
-        res.redirect('/');
+        const data = req.body;
+        const result = await prisma.Fahrrad.create({ data });
+        res.json(result);
     } catch (error) {
-        console.error("🔴 Fehler beim Speichern des Fahrrads:", error);
-        res.status(500).send("Ein Fehler ist beim Speichern der Daten aufgetreten.");
+        console.error(error);
+        res.status(500).json({ error: "Fehler beim Speichern" });
     }
 });
 
-app.listen(port, () => {
-    console.log(`Server läuft auf http://localhost:${port}`);
+// ----------------------------
+// Alle Fahrräder anzeigen
+// ----------------------------
+app.get("/fahrrad", async (req, res) => {
+    try {
+        const räder = await prisma.Fahrrad.findMany();
+        res.json(räder);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Fehler beim Anzeigen" });
+    }
 });
+
+// ----------------------------
+// Alle Fahrräder löschen
+// ----------------------------
+app.delete("/fahrrad", async (req, res) => {
+    try {
+        await prisma.Fahrrad.deleteMany();
+        res.json({ message: "Alle Fahrräder gelöscht" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Fehler beim Löschen" });
+    }
+});
+
+app.listen(3000, () =>
+    console.log("Server rennt auf http://localhost:3000")
+);

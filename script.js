@@ -1,52 +1,47 @@
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
-const { fakerDE } = require('@faker-js/faker');
+async function fahrradspeichern() {
+    const rad = {
+        name: document.getElementById("bikename").value,
+        preis: document.getElementById("bikeprice").value,
+        zoll: document.getElementById("bikesize").value,
+        farbe: document.getElementById("bikecolor").value
+    };
 
+    console.log("Sende an Server:", rad);
 
-
-async function fahrradspeichern(){
-    const name = document.getElementById("bikename").value;
-    const farbe = document.getElementById("bikecolor").value;
-    const zoll = document.getElementById("bikesize").value;
-    const preis = document.getElementById("bikeprice").value;
-
-    const rad ={
-        name: name,
-        preis: preis,
-        zoll: zoll,
-        farbe: farbe
-        }
-    console.log(rad);
-    await prisma.Fahrrad.create({data: rad});
+    await fetch("http://localhost:3000/fahrrad", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(rad)
+    });
 }
 
 
+async function dateneingabe(name, preis, zoll, farbe) {
+    const rad = { name, preis, zoll, farbe };
 
+    await fetch("http://localhost:3000/fahrrad", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(rad)
+    });
 
-async function dateneingabe(name, preis, zoll, farbe){
-    const prisma = new PrismaClient()
-    
-    const rad ={
-        name: name,
-        preis: preis,
-        zoll: zoll,
-        farbe: farbe
-        }
-    await prisma.Fahrrad.create({data: rad});
-        
-    console.log("Fahrrad Hinzugefügt");
-}
-
-async function Datenloschen(){
-    const prisma = new PrismaClient()
-    await prisma.Fahrrad.deleteMany()
+    console.log("Fahrrad hinzugefügt");
 }
 
 
-async function Datenanzeige(){
-    const prisma = new PrismaClient()
+async function Datenloschen() {
+    await fetch("http://localhost:3000/fahrrad", {
+        method: "DELETE"
+    });
 
-    const Rad = await prisma.Fahrrad.findMany()
+    console.log("Alle Fahrräder gelöscht");
+}
 
-    return Rad;
+
+async function Datenanzeige() {
+    const response = await fetch("http://localhost:3000/fahrrad");
+    const raeder = await response.json();
+
+    console.log("Daten vom Server:", raeder);
+    return raeder;
 }
