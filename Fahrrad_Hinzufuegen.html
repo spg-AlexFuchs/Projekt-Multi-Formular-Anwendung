@@ -34,13 +34,13 @@
           <a class="nav-link active" id="navbarStartLink" href="home.html" aria-current="page">Start</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="\html_files\Fahrrad_Hinzufuegen.html">Fahrrad hinzufügen</a>
+          <a class="nav-link" href="Fahrrad_Hinzufuegen.html">Fahrrad hinzufügen</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="\html_files\Modelle.html">Modelle vergleichen</a>
+          <a class="nav-link" href="Modelle.html">Modelle vergleichen</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="\html_files\statistics.html">Statistiken</a>
+          <a class="nav-link" href="statistics.html">Statistiken</a>
         </li>
       </ul>
     </div>
@@ -71,20 +71,14 @@
       <input type="text" class="form-control" placeholder="Zollgröße" aria-label="Username"
         aria-describedby="basic-addon1" id="bikesize">
     </div>
-    <div class="input-group mb-3">
-      <div class="input-group-prepend">
-        <span class="input-group-text">€</span>
-      </div>
-      <input type="text" class="form-control" aria-label="Amount (to the nearest dollar)">
-      <div class="input-group-append">
-        <input type="number" class="form-control" id="bikeprice" placeholder="Preis">
-        <span class="input-group-text">.00</span>
-      </div>
+    <div class="col-lg-8">
+      <input type="text" class="form-control" placeholder="Preis in €" aria-label="Username"
+        aria-describedby="basic-addon1" id="bikeprice">
     </div>
 
 
     <div class="col-lg-1">
-      <label for="button">Preis<br><span id="preisfeld"></span></label>
+      <label for="button">Preis: <br><span id="preisfeld"></span></label>
     </div>
     <div class="col-lg-3">
       <button type="button" class="btn btn-success" onclick="fahrradspeichern()">Hinzufügen</button>
