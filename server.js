@@ -19,7 +19,10 @@ app.use(express.json());
 app.post("/fahrrad", async (req, res) => {
     try {
         const data = req.body;
+        data.preis = parseFloat(data.preis);
+        data.zoll = parseFloat(data.zoll);
         const result = await prisma.Fahrrad.create({ data });
+
         res.json(result);
     } catch (error) {
         console.error(error);
