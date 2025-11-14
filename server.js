@@ -94,6 +94,48 @@ app.delete("/fahrrad", async (req, res) => {
 });
 
 
+// -------------------- 4) EINZELNES FAHRRAD LADEN --------------------
+// Des is die Route, mit der ma a einzigs Radl über seine ID abfragt.
+// Also z.B. /fahrrad/abc123 → gibt genau des Radl mit der ID "abc123" zrück.
+
+app.get("/fahrrad/:id", async (req, res) => {
+
+    // Aus da URL des "id"-Parameter rausziang
+    // (also des, wos hinten in da Adresse steht)
+    const id = req.params.id;
+
+    // Im Log ausgeben, damit ma si im Server anschaun kann,
+    // wos da Client eigentlich anfragt
+    console.log("Client will Radl mit ID:", id);
+
+    try {
+        // Im Prisma nachschaugn, obs a Radl gibt, des genau de ID hat.
+        // findUnique sucht exakt a einzigs Datensatz anhand der ID.
+        const rad = await prisma.fahrrad.findUnique({
+            where: { id: id }
+        });
+
+        // Wenn nix gfundn wurde, melden ma brav 404 zurück
+        if (!rad) {
+            console.log("Radl ned gfundn:", id); // fürs Log
+            return res.status(404).send("Radl existiert ned");
+        }
+
+        // Wenns existiert, schick ma's als JSON zrück zum Client
+        res.json(rad);
+
+    } catch (error) {
+        // Falls was schiefgeht (z.B. Prisma-Spompanadln),
+        // schreib ma den Fehler in die Konsole
+        console.error("Fehler beim Laden vom Radl:", error);
+
+        // Und melden dem Client, dass beim Server was ned passt
+        res.status(500).send("Server hat si verschluckt");
+    }
+});
+
+
+
 // Do starten ma den Server am Port 3000.
 // Und geben a kleine Meldung aus, damid ma woass, dass er laft.
 app.listen(3000, () =>
