@@ -137,3 +137,17 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 });
+
+// --- Login Button Handler hinzufügen ---
+document.addEventListener("DOMContentLoaded", function() {
+    // 1. Das Element mit der ID des Login-Buttons aus home.html abrufen
+    const loginButton = document.getElementById("navbarLoginElement");
+
+    // 2. Event Listener hinzufügen, falls der Button existiert
+    if (loginButton) {
+        loginButton.addEventListener("click", function() {
+            // 3. Weiterleitung zur Login-Seite im selben Verzeichnis
+            window.location.href = "login.html"; 
+        });
+    }
+});
