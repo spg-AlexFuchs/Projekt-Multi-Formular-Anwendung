@@ -37,9 +37,7 @@ async function ladeFahrradListe() {
     const bikes = await response.json();
 
     const select = document.getElementById("fahrradSelect");
-    if (!select) return;
-
-    select.innerHTML = "";
+    select.innerHTML = `<option value="">– Fahrrad wählen –</option>`;
 
     bikes.forEach(bike => {
         const option = document.createElement("option");
@@ -47,6 +45,17 @@ async function ladeFahrradListe() {
         option.textContent = bike.name;
         select.appendChild(option);
     });
+}
+
+async function ladeEinzelnesFahrrad(id) {
+    const response = await fetch(`http://localhost:3000/fahrrad/${id}`);
+    const bike = await response.json();
+
+    document.getElementById("bikeId").value = bike.id;
+    document.getElementById("bikename").value = bike.name;
+    document.getElementById("bikeprice").value = bike.preis;
+    document.getElementById("bikesize").value = bike.zoll;
+    document.getElementById("bikecolor").value = bike.farbe;
 }
 
 
@@ -150,4 +159,9 @@ document.addEventListener("DOMContentLoaded", function() {
             window.location.href = "login.html"; 
         });
     }
+});
+
+document.getElementById("fahrradSelect").addEventListener("change", (e) => {
+    const id = e.target.value;
+    if (id) ladeEinzelnesFahrrad(id);
 });
