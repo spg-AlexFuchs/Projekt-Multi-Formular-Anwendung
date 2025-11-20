@@ -14,3 +14,11 @@ model Fahrrad {
   zoll  Float
   farbe String
 }
+
+model Nutzer {
+  id       String @id @default(uuid())
+  vorname  String
+  nachname String
+  email    String @unique
+  passwort String
+}

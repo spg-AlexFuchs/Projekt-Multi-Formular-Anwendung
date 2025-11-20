@@ -122,6 +122,88 @@ app.get("/fahrrad/zoll", async (req, res) => {
     }
 });
 
+// -------------------------------------------------------------------
+// ROUTE: Nutzer registrieren (POST)
+// Do kann si a neuer Benutzer im System anmelden.
+// -------------------------------------------------------------------
+app.post("/signup", async (req, res) => {
+    try {
+        // De Daten, de uns da Client schickt
+        const { vorname, nachname, email, passwort } = req.body;
+
+        // Schauen ma zuerst, obs de E-Mail scho gibt (sonst gibts Gschiss)
+        const existing = await prisma.Nutzer.findUnique({
+            where: { email: email }
+        });
+
+        if (existing) {
+            return res.status(400).json({
+                error: "Heast, de Email gibt's scho. Such da a andere aus."
+            });
+        }
+
+        // Neuen Nutzer speichern
+        const user = await prisma.Nutzer.create({
+            data: {
+                vorname,
+                nachname,
+                email,
+                passwort // Passwort — unverschlüsselt… aber passt fürs Schulprojekt
+            }
+        });
+
+        // Erfolgsmeldung zurück
+        res.json({ message: "Du bist jetzt registriert!", user });
+
+    } catch (error) {
+        console.error("Fehler beim Signup:", error);
+        res.status(500).json({ error: "Heast, do is wos beim Registrieren schiefganga." });
+    }
+});
+
+// -------------------------------------------------------------------
+// ROUTE: Login (POST)
+// Do melden si de Benutzer an, wenns de richtigen Daten ham.
+// -------------------------------------------------------------------
+app.post("/login", async (req, res) => {
+    try {
+        const { email, passwort } = req.body;
+
+        // Nutzer anhand der Email suchen
+        const user = await prisma.Nutzer.findUnique({
+            where: { email: email }
+        });
+
+        // Wenns den Benutzer ned gibt → Pech
+        if (!user) {
+            return res.status(401).json({
+                error: "Email oder Passwort is falsch."
+            });
+        }
+
+        // Passwort vergleichen (jo, ned sicher — aber fürs Projekt gut genug)
+        if (user.passwort !== passwort) {
+            return res.status(401).json({
+                error: "Email oder Passwort is falsch."
+            });
+        }
+
+        // Wenn alles passt → Erfolg
+        res.json({
+            message: "Login erfolgreich!",
+            user: {
+                id: user.id,
+                vorname: user.vorname,
+                nachname: user.nachname,
+                email: user.email
+            }
+        });
+
+    } catch (error) {
+        console.error("Fehler beim Login:", error);
+        res.status(500).json({ error: "Heast, da Login is afoch gschissn ganga." });
+    }
+});
 
 
 // -------------------- 4) EINZELNES FAHRRAD LADEN --------------------
