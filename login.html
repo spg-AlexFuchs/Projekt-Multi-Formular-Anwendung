@@ -48,6 +48,20 @@
     </div>
 
     <script>
+        document.addEventListener("DOMContentLoaded", function() {
+    // 1. Element anhand der ID abrufen
+    const loginButton = document.getElementById("navbarLoginElement");
+
+    // 2. Event Listener hinzufügen
+    if (loginButton) {
+        loginButton.addEventListener("click", function() {
+            // 3. Auf die Login-Seite weiterleiten
+            window.location.href = "login.html";
+            // Oder falls login.html in einem anderen Ordner ist: 
+            // window.location.href = "/pfad/zu/login.html";
+        });
+    }
+});
         // Passwort anzeigen/ausblenden
         document.getElementById('showPassword').addEventListener('change', function () {
             document.getElementById('password').type = this.checked ? 'text' : 'password';
