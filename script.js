@@ -29,6 +29,42 @@ async function dateneingabe(name, preis, zoll, farbe) {
 
     console.log("Fahrrad hinzugefügt");
 }
+async function AenderungSpeichern(event) {
+    event.preventDefault(); // Verhindert komplettes Neuladen der Seite
+
+    const id = document.getElementById("bikeId").value;
+
+    const rad = {
+        name: document.getElementById("bikename").value,
+        preis: parseFloat(document.getElementById("bikeprice").value),
+        zoll: parseFloat(document.getElementById("bikesize").value),
+        farbe: document.getElementById("bikecolor").value
+    };
+
+    console.log("Speichere Fahrrad:", rad);
+
+    // --- Wenn ID existiert → UPDATE (PUT) ---
+    if (id) {
+        await fetch(`http://localhost:3000/fahrrad/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(rad)
+        });
+        console.log("Fahrrad erfolgreich aktualisiert");
+    }
+
+    // --- Wenn keine ID → NEUES Fahrrad (POST) ---
+    else {
+        await fetch(`http://localhost:3000/fahrrad`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(rad)
+        });
+        console.log("Neues Fahrrad hinzugefügt");
+    }
+
+    ladeFahrradListe(); // Dropdown aktualisieren
+}
 
 
 // --- Liste der Fahrräder laden ---
