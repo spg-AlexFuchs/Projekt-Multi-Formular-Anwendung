@@ -16,11 +16,18 @@ const prisma = new PrismaClient();
 
 
 // Do schalten ma CORS ein – sonst blockiert da Browser uns de Anfrogn.
+// Des is da CORS-Handler – sonst sudert da Browser, dass er ned zuafoin derf.
+// ...
+
+// Do schalten ma CORS ein – sonst blockiert da Browser uns de Anfrogn.
 app.use(cors({
-    origin: "http://127.0.0.1:5500",                         // Wir lass'n einfach olle zua, passt scho.
-    methods: ["GET", "POST", "DELETE"],  // De Methoden, de ma erlauben.
-    allowedHeaders: ["Content-Type"]     // Und de Header, de ma dulden.
+  origin: ["http://127.0.0.1:5500", "http://localhost:5000", "http://localhost:5500"], // WICHTIG: Füge 5500 hinzu, falls du es benutzt!
+  // NEU: PUT und DELETE dazug'setzt!
+  methods: ["GET", "POST", "PUT", "DELETE"], 
+  allowedHeaders: ["Content-Type"]   
 }));
+
+// ...
 
 
 // Do sog ma zum Server: "Heast, wenn wer JSON schickt – moch a Objekt draus."
@@ -121,6 +128,68 @@ app.get("/fahrrad/zoll", async (req, res) => {
         res.status(500).json({ error: "Heast, bei der Zoll-Statistik is wos schiefganga" });
     }
 });
+
+
+// -------------------- 5) EINZELNES FAHRRAD AKTUALISIEREN (PUT) --------------------
+// Ma schickt de geänderten Daten zua und aktualisiert des Radl mit der ID.
+
+app.put("/fahrrad/:id", async (req, res) => {
+    // ID vom Radl aus da URL ausziang
+    const id = req.params.id;
+    
+    // De neuen Daten vom Client (Browser)
+    const data = req.body; 
+
+    try {
+        // Zahlen wieder umwandeln, falls des Frontend es ned gscheit macht
+        if (data.preis) data.preis = parseFloat(data.preis); 
+        if (data.zoll) data.zoll = parseFloat(data.zoll); 
+
+        // Mit Prisma den Datensatz aktualisieren
+        const rad = await prisma.Fahrrad.update({
+            where: { id: id }, // Wos ma updaten woin
+            data: data          // Auf wos ma's updaten woin
+        });
+
+        // Erfolgsmeldung zurücksenden
+        res.json(rad);
+
+    } catch (error) {
+        console.error("Fehler beim Aktualisieren vom Radl:", error);
+        // Falls Radl ned existiert (z.B. P2025), is des a 404
+        if (error.code === 'P2025') {
+            return res.status(404).send("Radl zum Aktualisieren ned gfundn.");
+        }
+        res.status(500).send("Server hat si beim Aktualisieren verschluckt.");
+    }
+});
+
+// -------------------- 6) EINZELNES FAHRRAD LÖSCHEN (DELETE) --------------------
+// Ma haut a einzigs Radl anhand seiner ID aus da Datenbank auße.
+
+app.delete("/fahrrad/:id", async (req, res) => {
+    // ID vom Radl aus da URL ausziang
+    const id = req.params.id;
+
+    try {
+        // Mit Prisma den Datensatz löschen
+        await prisma.Fahrrad.delete({
+            where: { id: id },
+        });
+
+        // Erfolgsmeldung ohne Inhalt (204 No Content) schicken – passt fia DELETE!
+        res.status(204).send();
+
+    } catch (error) {
+        console.error("Fehler beim Löschen vom Radl:", error);
+        // Falls Radl ned existiert, is des a 404 (z.B. P2025)
+        if (error.code === 'P2025') {
+            return res.status(404).send("Radl zum Löschen ned gfundn.");
+        }
+        res.status(500).send("Server hat si beim Löschen verschluckt.");
+    }
+});
+
 
 // -------------------------------------------------------------------
 // ROUTE: Nutzer registrieren (POST)

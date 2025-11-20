@@ -29,7 +29,7 @@ async function dateneingabe(name, preis, zoll, farbe) {
 
     console.log("Fahrrad hinzugefügt");
 }
-async function AenderungSpeichern(event) {
+/*async function AenderungSpeichern(event) {
     event.preventDefault(); // Verhindert komplettes Neuladen der Seite
 
     const id = document.getElementById("bikeId").value;
@@ -65,7 +65,77 @@ async function AenderungSpeichern(event) {
 
     ladeFahrradListe(); // Dropdown aktualisieren
 }
+*/
+// --- Fahrrad speichern/aktualisieren ---
+async function AenderungSpeichern(event) {
+    // Verhindert, dass das Formular die Seite neu lädt
+    event.preventDefault(); 
 
+    const id = document.getElementById("bikeId").value;
+
+    // ACHTUNG: Preise und Zoll MÜSSEN als Zahlen (Float) an den Server gesendet werden!
+    const rad = {
+        name: document.getElementById("bikename").value,
+        preis: parseFloat(document.getElementById("bikeprice").value),
+        zoll: parseFloat(document.getElementById("bikesize").value),
+        farbe: document.getElementById("bikecolor").value
+    };
+    
+    // Einfache Validierung
+    if (isNaN(rad.preis) || isNaN(rad.zoll)) {
+        alert("❌ Fehler: Bitte geben Sie für Preis und Zoll gültige Zahlen ein.");
+        return;
+    }
+
+    let success = false;
+
+    try {
+        // --- Wenn ID existiert → UPDATE (PUT) ---
+        if (id) {
+            const response = await fetch(`http://localhost:3000/fahrrad/${id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(rad)
+            });
+            
+            if (response.ok) {
+                alert("✅ Fahrrad erfolgreich aktualisiert!"); 
+                success = true;
+            } else {
+                // Bei HTTP-Fehlern (z.B. 404, 500)
+                alert(`❌ Fehler beim Aktualisieren: Status ${response.status}`);
+            }
+        }
+
+        // --- Wenn keine ID → NEUES Fahrrad (POST) ---
+        else {
+            const response = await fetch(`http://localhost:3000/fahrrad`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(rad)
+            });
+            
+            if (response.ok) {
+                alert("➕ Neues Fahrrad erfolgreich hinzugefügt!"); 
+                success = true;
+                // Optional: Formular nach erfolgreichem POST zurücksetzen
+                document.getElementById("bikeForm").reset(); 
+            } else {
+                 alert(`❌ Fehler beim Hinzufügen: Status ${response.status}`);
+            }
+        }
+
+        // Wenn erfolgreich gespeichert, die Dropdown-Liste neu laden
+        if (success) {
+            ladeFahrradListe(); 
+        }
+
+    } catch (err) {
+        // Fehler, z.B. wenn der Server nicht erreichbar ist (CORS/NetworkError)
+        alert("🛑 Verbindung zum Server fehlgeschlagen. Läuft der Node.js Server?");
+        console.error("Speicherfehler:", err);
+    }
+}
 
 // --- Liste der Fahrräder laden ---
 async function ladeFahrradListe() {
@@ -102,7 +172,7 @@ async function zeigeFahrradDetails(id) {
     const bike = await response.json();
 
     const container = document.getElementById("fahrradDetails");
-
+    if (!container) return;
     container.innerHTML = `
         <div class="card p-3">
             <h3>${bike.name}</h3>
@@ -152,7 +222,40 @@ async function Charthinzufuegen() {
         console.error("Fehler beim Laden der Statistik:", err);
     }
 }
+async function loescheEinzelnesFahrrad() {
+    const id = document.getElementById("bikeId").value;
+    
+    if (!id) {
+        alert("Bitte wählen Sie zuerst ein Fahrrad zum Löschen aus!");
+        return;
+    }
 
+    // Bestätigungs-Pop-up
+    if (confirm("Sind Sie sicher, dass Sie dieses Fahrrad löschen wollen?")) {
+        try {
+            const response = await fetch(`http://localhost:3000/fahrrad/${id}`, {
+                method: "DELETE"
+            });
+
+            if (response.ok) {
+                alert("🗑️ Fahrrad erfolgreich gelöscht!");
+                // Felder leeren und Liste aktualisieren
+                document.getElementById("bikeForm").reset(); 
+                document.getElementById("bikeId").value = "";
+                // Die Details aus der Anzeige entfernen (falls vorhanden)
+                const details = document.getElementById("fahrradDetails");
+                if (details) details.innerHTML = '';
+                
+                ladeFahrradListe(); // Dropdown aktualisieren
+            } else {
+                alert(`❌ Fehler beim Löschen des Fahrrads: Status ${response.status}`);
+            }
+        } catch (err) {
+            alert("🛑 Verbindung zum Server fehlgeschlagen.");
+            console.error("Löschfehler:", err);
+        }
+    }
+}
 
 // --- Daten löschen ---
 async function Datenloschen() {
@@ -175,6 +278,8 @@ async function Datenanzeige() {
 
 
 // --- Seite initialisieren (Der EINZIGE DOMContentLoaded Block) ---
+// Füge DIESEN NEUEN BLOCK in den DOMContentLoaded-Block in script.js ein:
+
 document.addEventListener("DOMContentLoaded", () => {
     ladeFahrradListe();
     Charthinzufuegen();
@@ -186,6 +291,18 @@ document.addEventListener("DOMContentLoaded", () => {
             const id = select.value;
             if (id) zeigeFahrradDetails(id);
         });
+    }
+
+    const bikeForm = document.getElementById("bikeForm");
+    if (bikeForm) {
+        // Bei Klick auf "Speichern" wird die Funktion AenderungSpeichern aufgerufen
+        bikeForm.addEventListener("submit", AenderungSpeichern);
+    }
+    
+    // Füge auch den Listener für den Löschen-Button hinzu
+    const deleteBtn = document.getElementById("deleteBike");
+    if (deleteBtn) {
+        deleteBtn.addEventListener("click", loescheEinzelnesFahrrad); // Wir definieren loescheEinzelnesFahrrad gleich
     }
 
     // Logik 2: Zusätzlicher Listener, falls im Code doppelt
