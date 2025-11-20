@@ -16,7 +16,7 @@ model Fahrrad {
 }
 
 model Nutzer {
-  id       String @id @default(uuid())
+  id       String @id @default(cuid())
   vorname  String
   nachname String
   email    String @unique
