@@ -17,7 +17,7 @@ const prisma = new PrismaClient();
 
 // Do schalten ma CORS ein – sonst blockiert da Browser uns de Anfrogn.
 app.use(cors({
-    origin: "*",                         // Wir lass'n einfach olle zua, passt scho.
+    origin: "http://127.0.0.1:5500",                         // Wir lass'n einfach olle zua, passt scho.
     methods: ["GET", "POST", "DELETE"],  // De Methoden, de ma erlauben.
     allowedHeaders: ["Content-Type"]     // Und de Header, de ma dulden.
 }));

@@ -1,5 +1,5 @@
 node_modules
 .env
-.db
+/prisma/dev.db
 /generated/prisma
 

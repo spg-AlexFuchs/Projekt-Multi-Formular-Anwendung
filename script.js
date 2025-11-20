@@ -73,6 +73,7 @@ async function ladeFahrradListe() {
     const bikes = await response.json();
 
     const select = document.getElementById("fahrradSelect");
+    if (!select) return;
     select.innerHTML = `<option value="">– Fahrrad wählen –</option>`;
 
     bikes.forEach(bike => {
@@ -124,7 +125,11 @@ async function Charthinzufuegen() {
         const labels = data.map(e => e.size + " Zoll");
         const counts = data.map(e => e.count);
 
-        const ctx = document.getElementById("bikeChart").getContext("2d");
+        const canvas = document.getElementById("bikeChart");
+        
+        if (!canvas) return; 
+        
+        const ctx = canvas.getContext("2d");
 
         new Chart(ctx, {
             type: "bar",
@@ -169,11 +174,12 @@ async function Datenanzeige() {
 }
 
 
-// --- Seite initialisieren ---
+// --- Seite initialisieren (Der EINZIGE DOMContentLoaded Block) ---
 document.addEventListener("DOMContentLoaded", () => {
     ladeFahrradListe();
     Charthinzufuegen();
 
+    // Logik 1: Standard 'change' Listener für das select Element
     const select = document.getElementById("fahrradSelect");
     if (select) {
         select.addEventListener("change", () => {
@@ -181,24 +187,55 @@ document.addEventListener("DOMContentLoaded", () => {
             if (id) zeigeFahrradDetails(id);
         });
     }
-});
 
-// --- Login Button Handler hinzufügen ---
-document.addEventListener("DOMContentLoaded", function() {
-    // 1. Das Element mit der ID des Login-Buttons aus home.html abrufen
+    // Logik 2: Zusätzlicher Listener, falls im Code doppelt
+    // Wir lassen ihn drin, sichern ihn aber ab.
+    if (select) {
+        select.addEventListener("change", (e) => {
+            const id = e.target.value;
+            if (id) ladeEinzelnesFahrrad(id);
+        });
+    }
+
+    // Logik 3: LOGIN/LOGOUT-BUTTONS Logik absichern
     const loginButton = document.getElementById("navbarLoginElement");
+    const logoutBtn = document.getElementById("navbarLogoutElement");
 
-    // 2. Event Listener hinzufügen, falls der Button existiert
+    // NEU: Die Handler müssen auch abgesichert werden.
     if (loginButton) {
         loginButton.addEventListener("click", function() {
-            // 3. Weiterleitung zur Login-Seite im selben Verzeichnis
             window.location.href = "login.html"; 
         });
     }
+
+    if (logoutBtn) {
+        logoutBtn.addEventListener("click", function() {
+            localStorage.clear();
+            checkLoginStatus();
+            window.location.href = "home.html";
+        });
+    }
+
+    // Logik 4: Statusprüfung Funktion
+    function checkLoginStatus() {
+        const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+        
+        // Prüfe die Existenz der Buttons HIER DRINNE
+        const loginBtn = document.getElementById("navbarLoginElement");
+        const logoutBtn = document.getElementById("navbarLogoutElement");
+
+        if (isLoggedIn) {
+            if (loginBtn) loginBtn.style.display = 'none';
+            if (logoutBtn) logoutBtn.style.display = 'block';
+        } else {
+            if (loginBtn) loginBtn.style.display = 'block';
+            if (logoutBtn) logoutBtn.style.display = 'none';
+        }
+    }
+    
+    // Logik 5: Aufruf der Statusprüfung
+    checkLoginStatus(); 
+
 });
 
-document.getElementById("fahrradSelect").addEventListener("change", (e) => {
-    const id = e.target.value;
-    if (id) ladeEinzelnesFahrrad(id);
-});
 
